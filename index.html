@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konverter Sandi Morse</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 2rem;
+        }
+        .converter-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+        .text-box {
+            min-height: 150px;
+            border-radius: 5px;
+            padding: 1rem;
+            margin-top: 0.5rem;
+            background-color: #f8f9fa;
+            font-family: monospace;
+        }
+        h2 {
+            color: #0d6efd;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .nav-tabs {
+            margin-bottom: 1.5rem;
+        }
+        .btn-play {
+            margin-left: 10px;
+        }
+        .morse-player {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        .tab-content {
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container converter-container">
+        <h2>Konverter Sandi Morse</h2>
+        
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="text-to-morse-tab" data-bs-toggle="tab" data-bs-target="#text-to-morse" type="button" role="tab">Teks ke Morse</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="morse-to-text-tab" data-bs-toggle="tab" data-bs-target="#morse-to-text" type="button" role="tab">Morse ke Teks</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="myTabContent">
+            <!-- Text to Morse Tab -->
+            <div class="tab-pane fade show active" id="text-to-morse" role="tabpanel">
+                <div class="mb-3">
+                    <label for="inputText" class="form-label">Masukkan Teks:</label>
+                    <textarea class="form-control text-box" id="inputText" rows="3" placeholder="Ketik teks di sini..."></textarea>
+                </div>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-3">
+                    <button class="btn btn-primary" id="convertToMorseBtn">Konversi ke Morse</button>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Hasil Sandi Morse:</label>
+                    <div class="text-box" id="morseResult"></div>
+                    <button class="btn btn-success btn-play" id="playMorseBtn">
+                        <i class="bi bi-play-fill"></i> Putar Morse
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Morse to Text Tab -->
+            <div class="tab-pane fade" id="morse-to-text" role="tabpanel">
+                <div class="mb-3">
+                    <label for="inputMorse" class="form-label">Masukkan Sandi Morse:</label>
+                    <textarea class="form-control text-box" id="inputMorse" rows="3" placeholder="Ketik sandi morse di sini (gunakan . dan -, pisahkan huruf dengan spasi, kata dengan /)"></textarea>
+                </div>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-3">
+                    <button class="btn btn-primary" id="convertToTextBtn">Konversi ke Teks</button>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Hasil Teks:</label>
+                    <div class="text-box" id="textResult"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="morse-player">
+            <h5>Pemain Morse</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="speedControl" class="form-label">Kecepatan (WPM):</label>
+                    <input type="range" class="form-range" min="5" max="30" value="15" id="speedControl">
+                    <span id="speedValue">15 WPM</span>
+                </div>
+                <div class="col-md-6">
+                    <label for="frequencyControl" class="form-label">Frekuensi (Hz):</label>
+                    <input type="range" class="form-range" min="300" max="1000" value="600" id="frequencyControl">
+                    <span id="frequencyValue">600 Hz</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer pt-5 pb-4">
+        <div class="container">
+            <p class="text-center text-muted">Copyright &copy; 2025 Farhan Maulana Syidiq. All rights reserved</P>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Morse code dictionary
+            const morseCode = {
+                'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 
+                'F': '..-.', 'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 
+                'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---', 
+                'P': '.--.', 'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-', 
+                'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-', 'Y': '-.--', 
+                'Z': '--..', '0': '-----', '1': '.----', '2': '..---', 
+                '3': '...--', '4': '....-', '5': '.....', '6': '-....', 
+                '7': '--...', '8': '---..', '9': '----.', '.': '.-.-.-', 
+                ',': '--..--', '?': '..--..', "'": '.----.', '!': '-.-.--', 
+                '/': '-..-.', '(': '-.--.', ')': '-.--.-', '&': '.-...', 
+                ':': '---...', ';': '-.-.-.', '=': '-...-', '+': '.-.-.', 
+                '-': '-....-', '_': '..--.-', '"': '.-..-.', '$': '...-..-', 
+                '@': '.--.-.', ' ': '/'
+            };
+            
+            // Reverse dictionary for Morse to Text
+            const reverseMorse = {};
+            for (const key in morseCode) {
+                reverseMorse[morseCode[key]] = key;
+            }
+            
+            // DOM elements
+            const inputText = document.getElementById('inputText');
+            const inputMorse = document.getElementById('inputMorse');
+            const morseResult = document.getElementById('morseResult');
+            const textResult = document.getElementById('textResult');
+            const convertToMorseBtn = document.getElementById('convertToMorseBtn');
+            const convertToTextBtn = document.getElementById('convertToTextBtn');
+            const playMorseBtn = document.getElementById('playMorseBtn');
+            const speedControl = document.getElementById('speedControl');
+            const frequencyControl = document.getElementById('frequencyControl');
+            const speedValue = document.getElementById('speedValue');
+            const frequencyValue = document.getElementById('frequencyValue');
+            
+            // Audio context for playing Morse code
+            let audioContext;
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.error('Web Audio API not supported');
+                playMorseBtn.disabled = true;
+                playMorseBtn.title = 'Web Audio API tidak didukung di browser Anda';
+            }
+            
+            // Update speed and frequency display
+            speedControl.addEventListener('input', function() {
+                speedValue.textContent = this.value + ' WPM';
+            });
+            
+            frequencyControl.addEventListener('input', function() {
+                frequencyValue.textContent = this.value + ' Hz';
+            });
+            
+            // Convert text to Morse
+            convertToMorseBtn.addEventListener('click', function() {
+                const text = inputText.value.toUpperCase();
+                let morse = '';
+                
+                for (let i = 0; i < text.length; i++) {
+                    const char = text[i];
+                    if (morseCode[char]) {
+                        morse += morseCode[char] + ' ';
+                    } else if (char === ' ') {
+                        morse += '/ ';
+                    } else {
+                        morse += '# '; // Unknown character
+                    }
+                }
+                
+                morseResult.textContent = morse.trim();
+            });
+            
+            // Convert Morse to text
+            convertToTextBtn.addEventListener('click', function() {
+                const morse = inputMorse.value.trim();
+                const morseWords = morse.split('/');
+                let text = '';
+                
+                for (let i = 0; i < morseWords.length; i++) {
+                    const morseChars = morseWords[i].trim().split(' ');
+                    
+                    for (let j = 0; j < morseChars.length; j++) {
+                        const code = morseChars[j];
+                        if (reverseMorse[code]) {
+                            text += reverseMorse[code];
+                        } else if (code === '') {
+                            // Do nothing for empty strings
+                        } else {
+                            text += '#'; // Unknown Morse code
+                        }
+                    }
+                    
+                    if (i < morseWords.length - 1) {
+                        text += ' ';
+                    }
+                }
+                
+                textResult.textContent = text;
+            });
+            
+            // Play Morse code sound
+            playMorseBtn.addEventListener('click', function() {
+                const morse = morseResult.textContent;
+                if (!morse || !audioContext) return;
+                
+                playMorseBtn.disabled = true;
+                playMorseBtn.innerHTML = '<i class="bi bi-stop-fill"></i> Berhenti';
+                
+                // Calculate timing based on WPM (words per minute)
+                const wpm = parseInt(speedControl.value);
+                const dotDuration = 1.2 / wpm; // Standard PARIS timing
+                const dashDuration = 3 * dotDuration;
+                const symbolSpace = dotDuration;
+                const letterSpace = 3 * dotDuration - symbolSpace;
+                const wordSpace = 7 * dotDuration - letterSpace;
+                
+                const frequency = parseInt(frequencyControl.value);
+                let time = audioContext.currentTime + 0.1; // Start slightly in the future
+                
+                // Create oscillator and gain node
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.value = frequency;
+                gainNode.gain.value = 0;
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.start();
+                
+                // Play each symbol
+                for (let i = 0; i < morse.length; i++) {
+                    const char = morse[i];
+                    
+                    if (char === '.') {
+                        // Dot
+                        gainNode.gain.setValueAtTime(1, time);
+                        time += dotDuration;
+                        gainNode.gain.setValueAtTime(0, time);
+                        time += symbolSpace;
+                    } else if (char === '-') {
+                        // Dash
+                        gainNode.gain.setValueAtTime(1, time);
+                        time += dashDuration;
+                        gainNode.gain.setValueAtTime(0, time);
+                        time += symbolSpace;
+                    } else if (char === ' ') {
+                        // Letter space (already has symbolSpace)
+                        time += letterSpace;
+                    } else if (char === '/') {
+                        // Word space (already has letterSpace)
+                        time += wordSpace;
+                    }
+                }
+                
+                // Stop oscillator after last symbol
+                setTimeout(function() {
+                    oscillator.stop();
+                    playMorseBtn.disabled = false;
+                    playMorseBtn.innerHTML = '<i class="bi bi-play-fill"></i> Putar Morse';
+                }, (time - audioContext.currentTime) * 1000);
+            });
+            
+            // Initialize with sample text
+            inputText.value = 'SOS';
+            convertToMorseBtn.click();
+        });
+    </script>
+</body>
+</html>
